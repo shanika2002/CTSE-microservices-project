@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Product = require("../models/Product");
+const { callViaGateway } = require("../helpers/gatewayFunc");
 
 // POST /products
 const createProduct = async (req, res) => {
@@ -80,7 +81,7 @@ const getProductById = async (req, res) => {
 // PUT /products/:id
 const updateProduct = async (req, res) => {
   try {
-    const { name, description, category, price, stock } = req.body;
+    const { name, description, category, price, stock, quantity } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({
@@ -96,6 +97,48 @@ const updateProduct = async (req, res) => {
       });
     }
 
+    // Case 1: Order service sends quantity to reduce stock
+    if (quantity !== undefined) {
+      if (quantity <= 0) {
+        return res.status(400).json({
+          message: "Quantity must be greater than 0",
+        });
+      }
+
+      if (product.stock < quantity) {
+        return res.status(400).json({
+          message: "Insufficient stock",
+        });
+      }
+
+      product.stock = product.stock - quantity;
+      await product.save();
+
+      // Low stock alert
+      if (product.stock < Number(process.env.LOW_STOCK_THRESHOLD || 5)) {
+        try {
+          await callViaGateway(
+            "POST",
+            "/notification/send",
+            {
+              message: `Low stock alert: ${product.name} has only ${product.stock} items left`,
+              productId: product._id,
+              type: "LOW_STOCK",
+            },
+            req.headers
+          );
+        } catch (notifyError) {
+          console.error("Low stock notification failed:", notifyError.message);
+        }
+      }
+
+      return res.status(200).json({
+        message: "Product stock reduced successfully",
+        product,
+      });
+    }
+
+    // Case 2: Normal update
     product.name = name ?? product.name;
     product.description = description ?? product.description;
     product.category = category ?? product.category;
@@ -103,6 +146,24 @@ const updateProduct = async (req, res) => {
     product.stock = stock ?? product.stock;
 
     await product.save();
+
+    // Low stock alert for normal stock update too
+    if (product.stock < Number(process.env.LOW_STOCK_THRESHOLD || 5)) {
+      try {
+        await callViaGateway(
+          "POST",
+          "/notification/send",
+          {
+            message: `Low stock alert: ${product.name} has only ${product.stock} items left`,
+            productId: product._id,
+            type: "LOW_STOCK",
+          },
+          req.headers
+        );
+      } catch (notifyError) {
+        console.error("Low stock notification failed:", notifyError.message);
+      }
+    }
 
     return res.status(200).json({
       message: "Product updated successfully",
@@ -143,6 +204,23 @@ const updateStock = async (req, res) => {
 
     product.stock = stock;
     await product.save();
+
+    if (product.stock < Number(process.env.LOW_STOCK_THRESHOLD || 5)) {
+      try {
+        await callViaGateway(
+          "POST",
+          "/notification/send",
+          {
+            message: `Low stock alert: ${product.name} has only ${product.stock} items left`,
+            productId: product._id,
+            type: "LOW_STOCK",
+          },
+          req.headers
+        );
+      } catch (notifyError) {
+        console.error("Low stock notification failed:", notifyError.message);
+      }
+    }
 
     return res.status(200).json({
       message: "Stock updated successfully",
