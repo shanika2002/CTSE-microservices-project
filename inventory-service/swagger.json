@@ -35,17 +35,19 @@
                 "type": "object",
                 "properties": {
                   "name": { "type": "string", "example": "Laptop" },
-                  "description": { "type": "string", "example": "Dell laptop" },
+                  "description": { "type": "string", "example": "Dell Inspiron laptop" },
                   "category": { "type": "string", "example": "Electronics" },
                   "price": { "type": "number", "example": 250000 },
                   "stock": { "type": "number", "example": 10 }
-                }
+                },
+                "required": ["name", "price", "stock"]
               }
             }
           }
         },
         "responses": {
-          "201": { "description": "Product created successfully" }
+          "201": { "description": "Product created successfully" },
+          "400": { "description": "Validation error" }
         }
       },
       "get": {
@@ -75,13 +77,16 @@
                 "properties": {
                   "productId": { "type": "string", "example": "6896f7ee0e7f8e1234567890" },
                   "quantity": { "type": "number", "example": 2 }
-                }
+                },
+                "required": ["productId", "quantity"]
               }
             }
           }
         },
         "responses": {
-          "200": { "description": "Stock checked successfully" }
+          "200": { "description": "Stock checked successfully" },
+          "400": { "description": "Invalid product id or request data" },
+          "404": { "description": "Product not found" }
         }
       }
     },
@@ -108,7 +113,7 @@
         }
       },
       "put": {
-        "summary": "Update product or reduce stock by quantity",
+        "summary": "Update product details or reduce stock using quantity",
         "tags": ["Products"],
         "security": [
           { "bearerAuth": [] }
@@ -130,7 +135,7 @@
                 "type": "object",
                 "properties": {
                   "name": { "type": "string", "example": "Updated Laptop" },
-                  "description": { "type": "string", "example": "Updated description" },
+                  "description": { "type": "string", "example": "Updated laptop description" },
                   "category": { "type": "string", "example": "Electronics" },
                   "price": { "type": "number", "example": 260000 },
                   "stock": { "type": "number", "example": 8 },
@@ -141,7 +146,9 @@
           }
         },
         "responses": {
-          "200": { "description": "Product updated successfully" }
+          "200": { "description": "Product updated successfully or stock reduced successfully" },
+          "400": { "description": "Invalid product id or invalid quantity" },
+          "404": { "description": "Product not found" }
         }
       }
     },
@@ -169,13 +176,16 @@
                 "type": "object",
                 "properties": {
                   "stock": { "type": "number", "example": 5 }
-                }
+                },
+                "required": ["stock"]
               }
             }
           }
         },
         "responses": {
-          "200": { "description": "Stock updated successfully" }
+          "200": { "description": "Stock updated successfully" },
+          "400": { "description": "Invalid product id or missing stock" },
+          "404": { "description": "Product not found" }
         }
       }
     }

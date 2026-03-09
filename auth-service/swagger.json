@@ -35,7 +35,8 @@
                   "email": { "type": "string", "example": "shanika@gmail.com" },
                   "password": { "type": "string", "example": "123456" },
                   "role": { "type": "string", "example": "admin" }
-                }
+                },
+                "required": ["name", "email", "password"]
               }
             }
           }
@@ -60,7 +61,8 @@
                 "properties": {
                   "email": { "type": "string", "example": "shanika@gmail.com" },
                   "password": { "type": "string", "example": "123456" }
-                }
+                },
+                "required": ["email", "password"]
               }
             }
           }
