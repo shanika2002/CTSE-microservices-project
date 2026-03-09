@@ -1,0 +1,56 @@
+name: Node Microservices CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Setup Node
+      uses: actions/setup-node@v3
+      with:
+        node-version: 20
+
+    # -------------------------
+    # Install Auth Service
+    # -------------------------
+
+    - name: Install Auth Service
+      run: |
+        cd auth-service
+        npm install
+
+    # -------------------------
+    # Install Inventory Service
+    # -------------------------
+
+    - name: Install Inventory Service
+      run: |
+        cd inventory-service
+        npm install
+
+    # -------------------------
+    # Install API Gateway
+    # -------------------------
+
+    - name: Install API Gateway
+      run: |
+        cd api-gateway
+        npm install
+
+    # -------------------------
+    # Build Docker images
+    # -------------------------
+
+    - name: Build Docker Images
+      run: docker compose build
