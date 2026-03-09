@@ -1,0 +1,390 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API Gateway",
+    "version": "1.0.0",
+    "description": "Gateway for Auth Service and Inventory Service"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000"
+    },
+    {
+      "url": "https://api-gateway.gentlehill-571d6cde.southeastasia.azurecontainerapps.io"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "RegisterRequest": {
+        "type": "object",
+        "required": ["name", "email", "password"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Shanika"
+          },
+          "email": {
+            "type": "string",
+            "example": "shanika@gmail.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "123456"
+          },
+          "role": {
+            "type": "string",
+            "example": "admin"
+          }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "shanika@gmail.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "123456"
+          }
+        }
+      },
+      "CreateProductRequest": {
+        "type": "object",
+        "required": ["name", "price", "stock"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Laptop"
+          },
+          "description": {
+            "type": "string",
+            "example": "Gaming laptop"
+          },
+          "category": {
+            "type": "string",
+            "example": "Electronics"
+          },
+          "price": {
+            "type": "number",
+            "example": 250000
+          },
+          "stock": {
+            "type": "number",
+            "example": 10
+          }
+        }
+      },
+      "CheckStockRequest": {
+        "type": "object",
+        "required": ["productId", "quantity"],
+        "properties": {
+          "productId": {
+            "type": "string",
+            "example": "69aae050e2d3be75ce0a9bc0"
+          },
+          "quantity": {
+            "type": "number",
+            "example": 2
+          }
+        }
+      },
+      "UpdateProductRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Updated Laptop"
+          },
+          "description": {
+            "type": "string",
+            "example": "Updated description"
+          },
+          "category": {
+            "type": "string",
+            "example": "Electronics"
+          },
+          "price": {
+            "type": "number",
+            "example": 260000
+          },
+          "stock": {
+            "type": "number",
+            "example": 8
+          },
+          "quantity": {
+            "type": "number",
+            "example": 2
+          }
+        }
+      },
+      "UpdateStockRequest": {
+        "type": "object",
+        "required": ["stock"],
+        "properties": {
+          "stock": {
+            "type": "number",
+            "example": 15
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "summary": "Register a new user",
+        "tags": ["Auth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Login user",
+        "tags": ["Auth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful"
+          }
+        }
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "summary": "Get current logged-in user",
+        "tags": ["Auth"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current user details"
+          }
+        }
+      }
+    },
+    "/auth/users/{id}": {
+      "get": {
+        "summary": "Get user by ID",
+        "tags": ["Auth"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User found"
+          }
+        }
+      }
+    },
+    "/inventory/products": {
+      "post": {
+        "summary": "Create a product",
+        "tags": ["Inventory"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProductRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Product created successfully"
+          }
+        }
+      },
+      "get": {
+        "summary": "Get all products",
+        "tags": ["Inventory"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Products fetched successfully"
+          }
+        }
+      }
+    },
+    "/inventory/products/check-stock": {
+      "post": {
+        "summary": "Check stock availability",
+        "tags": ["Inventory"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckStockRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Stock checked successfully"
+          }
+        }
+      }
+    },
+    "/inventory/products/{id}": {
+      "get": {
+        "summary": "Get product by ID",
+        "tags": ["Inventory"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product found"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update product details or reduce stock using quantity",
+        "tags": ["Inventory"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProductRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Product updated successfully"
+          }
+        }
+      }
+    },
+    "/inventory/products/{id}/stock": {
+      "patch": {
+        "summary": "Update product stock directly",
+        "tags": ["Inventory"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateStockRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Stock updated successfully"
+          }
+        }
+      }
+    }
+  }
+}

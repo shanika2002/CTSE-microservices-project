@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const authProxyRoutes = require("./routes/authProxyRoutes");
 const inventoryProxyRoutes = require("./routes/inventoryProxyRoutes");
+const swaggerUi = require("swagger-ui-express");
+const swaggerDocument = require("../swagger.json");
 
 const app = express();
 
@@ -13,6 +15,8 @@ app.get("/", (req, res) => {
     message: "API Gateway is running",
   });
 });
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use("/auth", authProxyRoutes);
 app.use("/inventory", inventoryProxyRoutes);
